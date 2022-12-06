@@ -1,6 +1,8 @@
 #:set ee dp(150)
 
-<MyScreen>
+Canvas2:
+
+<Canvas1>
 	canvas:
 		Color:
 			rgba: 0, 1, 0, 1
@@ -30,3 +32,9 @@
 			width:10
 		Line:
 			rectangle: (dp(50), dp(500), dp(210), dp(30))
+
+<Canvas2>:
+	Button:
+		text:'eee'
+		pos:dp(400), dp(300)
+		on_press: root.redraw()
