@@ -1,4 +1,32 @@
-<MyScreen>:
+#:set ee dp(150)
+
+<MyScreen>
 	canvas:
+		Color:
+			rgba: 0, 1, 0, 1
 		Rectangle:
-			pos:
+			pos: self.center_x - ee/2, self.center_y - ee/2
+			size: ee, ee
+		Ellipse:
+			pos: dp(0), dp(150)
+			size: ee, ee/4
+		Line:
+			points: (0, 0, self.width, self.height)
+			width:5
+		Color:
+			rgba: 1, 0, 0, 1
+		Line:#cross vertical
+			points: (self.width/2, self.height, self.width/2, 0)
+			width:1
+		Line:#cross horizontal
+			points: (self.width, self.height/2, 0, self.height/2)
+			width:1
+		Color:
+			rgba: 0, 0, 1, 1
+		Line:
+			circle: (700, 200, 100)#center x center y, radius
+		Line:
+			ellipse: (200, 400, 30, 130)#center x center y, radius x, radius y
+			width:10
+		Line:
+			rectangle: (dp(50), dp(500), dp(210), dp(30))
