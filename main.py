@@ -1,84 +1,95 @@
-import kivy, random
-from kivy.app import App
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.widget import Widget
-from kivy.graphics import *
-from kivy.core.window import Window
-from kivy.lang import Builder
-from kivy.metrics import dp
-from kivy.graphics.vertex_instructions import  *
-from kivy.properties import ObjectProperty, Clock
 from kivy.graphics.vertex import *
-
+from kivy.properties import ObjectProperty, Clock
+from kivy.graphics.vertex_instructions import *
+from kivy.metrics import dp
+from kivy.lang import Builder
+from kivy.core.window import Window
+from kivy.graphics import *
+from kivy.uix.widget import Widget
+from kivy.uix.textinput import TextInput
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.app import App
+from kivy.config import Config
+from math import cos, sin, sqrt
+import kivy
+import random
+import kivy
 kivy.require('1.9.0')
 
+Config.set('graphics', 'width', '600')
+Config.set('graphics', 'height', '900')
 
+
+def distance(x1, y1, x2, y2):
+    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
 
 
 class MyScreen(Widget):
     pass
-    #def __init__(self, **kwargs):
+    # def __init__(self, **kwargs):
     #    super(MyScreen, self).__init__(**kwargs)
 
 
+class GameCanvas(Widget):
 
-class Canvas1(Widget):
-    pass
-    
-class Canvas2(Widget):
+    COLS = 10
+    LINES = 20
+    MEMORY_ROWS = 4
+
     def __init__(self, **kwargs):
-        super(Canvas2, self).__init__(**kwargs)
+        # self declarations of variables
+        self.fps = 60.0
+        self.matrix = [[0 for x in range(self.COLS)]
+                       for y in range(self.LINES + self.MEMORY_ROWS)]
+        super(GameCanvas, self).__init__(**kwargs)
+        self.print_matrix()
         with self.canvas:
-            Line(points=(100, 100, 400, 500), width=5)
-            Color(0, 0.6, 0.4, 1)
-            self.rect = Rectangle(pos=(300, 400), size=(50, 50))
-
-    def redraw(self):
-        x, y = self.rect.pos
-        x += dp(50)
-        if(x > self.width):
-            x = dp(0)
-        self.rect.pos = (x, y)
-
-class Canvas3(Widget):
-    def __init__(self, **kwargs):
-        self.fps = 60
-        self.vx = dp(5)
-        self.vy = dp(5)
-        self.ball_size = dp(50)
-        self.ball_x = self.width/2
-        self.ball_y = self.height/2
-        super(Canvas3, self).__init__(**kwargs)
-        with self.canvas:
-            self.ball = Ellipse(pos=(self.ball_x, self.ball_y), size=(self.ball_size, self.ball_size))
-
-        Clock.schedule_interval(self.update, 1/self.fps)#update every one second
-
+            # self declaration of canvas objects
+            pass
+        Clock.schedule_interval(self.update, 1/self.fps)  # update interval
 
     def on_size(self, *args):
-        print("on_size : " + str(self.width) + ", "+ str(self.height))
-        self.ball.pos = self.width/2-self.ball_size/2, self.height/2-self.ball_size/2
+        print("on_size : " + str(self.width) + ", " + str(self.height))
 
-    def update(self, dt):#dt is delta time
-        x, y = self.ball.pos
-        if(x + self.ball.size[0] > self.width or x < 0):
-            self.vx *= -1
-        if(y+ self.ball.size[1] > self.height or y < 0):
-            self.vy *= -1
-        self.ball.pos = (x+self.vx, y+self.vy)
+    # self update of canvas objects and variable every game ticks
+    def update(self, dt):  # dt is delta time
+        time_factor = self.fps*dt
+        with self.canvas:
+            Color(0, 0, 0, 1)
+            Rectangle(pos=(0, 0), size=(self.width, self.height))
+        self.draw_cylinder()
+        # self.draw_grid()
 
+    def draw_grid(self):
+        with self.canvas:
+            Color(1, 1, 1, 1)
+            for i in range(self.LINES + 1):
+                Line(points=(0, i*(float(self.height)/self.LINES),
+                    self.width, i*(float(self.height)/self.LINES)))
+            for i in range(self.COLS + 1):
+                Line(points=(i*(float(self.width)/self.COLS), 0,
+                    i*(float(self.width)/self.COLS), self.height))
 
+    def print_matrix(self):
+        for i in range(len(self.matrix)):
+            for j in range(len(self.matrix[i])):
+                print(self.matrix[i][j], end=" ")
+            print("|" + str(i))
 
-
-
-
-
-
-
-
+    def draw_cylinder(self):
+        with self.canvas:
+            # lets find the radius of the bigger circle (englobing the full screen):
+            radius = distance(self.width/2, self.height/2, 0, 0)
+            end_opening = radius*0.01
+            Color(1, 1, 0, 1)
+            for i in range(self.COLS):#colss display
+                alpha = i/(float(self.COLS))*3.1415*2
+                Line(points=(self.width/2 + cos(alpha)*end_opening,self.height/2 + sin(alpha)*end_opening, self.width/2 + cos(alpha)*radius,self.height/2 + sin(alpha)*radius))
+            for i in range(self.LINES):#line display
+                long = end_opening + i*i*(radius - end_opening)/(self.LINES*self.LINES)
+                Line(circle=(self.width/2, self.height/2, long))
 
 
 
@@ -89,7 +100,7 @@ class MyApp(App):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
+
 
     def build(self):
         #Window.clearcolor = 9/255, 11/255, 10/255, 1#bg color
@@ -98,6 +109,6 @@ class MyApp(App):
     """
     pass
 
+
 if __name__ == '__main__':
     MyApp().run()
-
