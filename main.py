@@ -51,7 +51,7 @@ class GameCanvas(Widget):
     def __init__(self, **kwargs):
         # self declarations of variables
         self.it = 0
-        self.fps = 10.0
+        self.fps = 60.0
         self.matrix = [[0 for x in range(self.COLS*4)]
                         for y in range(self.LINES)]
 
@@ -68,6 +68,8 @@ class GameCanvas(Widget):
     # self update of canvas objects and variable every game ticks
     def update(self, dt):  # dt is delta time
         time_factor = self.fps*dt
+        self.matrix[self.it//(self.COLS*4)][self.it % (self.COLS*4)] = 1
+        self.it = 1 + (self.it % (self.COLS*4*self.LINES - 1))
         with self.canvas:
             Color(0, 0, 0, 1)
             Rectangle(pos=(0, 0), size=(self.width, self.height))
@@ -101,10 +103,10 @@ class GameCanvas(Widget):
             print("|" + str(i))
 
     def draw_rect(self):
-        x = self.width*0.6
-        y = self.height*0.1
-        w = self.width*0.01
-        h = self.height*0.05
+        x = self.width*0.5
+        y = self.height*0.3
+        w = self.width*0.2
+        h = self.height*0.1
         #bottom
         for c in range(self.LINES):
             start1 = [x - w/2- c    *(x - w/2)/self.LINES, (y  - h/2) - c    *(y  - h/2)/self.LINES]
@@ -118,7 +120,9 @@ class GameCanvas(Widget):
                 p3 = [start1[0] + (l+1)*(end1[0] - start1[0])/self.COLS, start1[1]]
                 p4 = [start2[0] + (l+1)*(end2[0] - start2[0])/self.COLS, start2[1]]
                 if(self.matrix[c][l] == 0):
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)  
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
+                else:
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
         #up
         for c in range(self.LINES):
@@ -131,8 +135,10 @@ class GameCanvas(Widget):
                 p2 = [start2[0] + (l - self.COLS*2)    *(end2[0] - start2[0])/self.COLS, start2[1]]
                 p3 = [start1[0] + (l - self.COLS*2+1)*(end1[0] - start1[0])/self.COLS, start1[1]]
                 p4 = [start2[0] + (l - self.COLS*2+1)*(end2[0] - start2[0])/self.COLS, start2[1]]
-                if(self.matrix[c][l] == 0):
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True) 
+                if(self.matrix[c][self.COLS*5-l - 1] == 0):
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
+                else:
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False) 
 
         #left
         for c in range(self.LINES):
@@ -145,8 +151,10 @@ class GameCanvas(Widget):
                 p2 = [start2[0], start2[1] + (l - self.COLS*3)  *(end2[1]-start2[1])/self.COLS]
                 p3 = [start1[0], start1[1] + (l - self.COLS*3+1)*(end1[1]-start1[1])/self.COLS]
                 p4 = [start2[0], start2[1] + (l - self.COLS*3+1)*(end2[1]-start2[1])/self.COLS]
-                if(self.matrix[c][l] == 0):
+                if(self.matrix[c][self.COLS*7 - l - 1] == 0):
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
+                else:
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
         #right
         for c in range(self.LINES):
@@ -161,6 +169,8 @@ class GameCanvas(Widget):
                 p4 = [start2[0], start2[1] + (l - self.COLS*1+1)*(end2[1]-start2[1])/self.COLS]
                 if(self.matrix[c][l] == 0):
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
+                else:
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
 
 
