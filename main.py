@@ -34,7 +34,7 @@ def polygon(x1, y1, x2, y2, x3, y3, x4, y4, empty):
         Triangle(points=(x3, y3, x4, y4, x1, y1))
         Triangle(points=(x4, y4, x1, y1, x2, y2))
     else:
-        Line(points=(x1, y1, x2, y2, x3, y3, x4, y4, x1, y1))
+        Line(points=(x1, y1, x2, y2, x3, y3, x4, y4, x1, y1), width=2)
 
 class MyScreen(Widget):
     pass
@@ -44,8 +44,8 @@ class MyScreen(Widget):
 
 class GameCanvas(Widget):
 
-    COLS = 10
-    LINES = 10
+    COLS = 8
+    LINES = 5
     INCLINATION = 0.2
 
     def __init__(self, **kwargs):
@@ -70,12 +70,19 @@ class GameCanvas(Widget):
         time_factor = self.fps*dt
         with self.canvas:
             Color(0, 0, 0, 1)
+            Rectangle(pos=(0, 0), size=(self.width, self.height))
             Color(1, 0, 0, 1)
             #polygon(100, 100, 200, 120, 210, 200, 120, 190, False)
             #Line(points=(0, 0, 0, 400, 200, 200))
             #self.draw_grid()
             #Ellipse(pos=(0, 0), size=(self.width, 100), angle_start=0, angle_end=180)
             self.draw_rect()
+            Color(0, 0, 1, 1)
+            Line(points=(self.width/3, self.height, self.width/3, 0))
+            Line(points=(2*self.width/3, self.height, 2*self.width/3, 0))
+            Line(points=(self.width, self.height/3, 0, self.height/3))
+            Line(points=(self.width, 2*self.height/3, 0, 2*self.height/3))
+
 
     def draw_grid(self):
         with self.canvas:
@@ -94,50 +101,27 @@ class GameCanvas(Widget):
             print("|" + str(i))
 
     def draw_rect(self):
-        center_x = self.width/2
-        center_y = self.height/2
-        center_width = self.width/3
-        center_height = self.height/3
-        #display down border :
-        sx = 0
-        count = 0 
-        while count <= self.LINES :
-            count += 1
-            y = sx*(center_y - center_height/2)/(center_x - center_width/2)
-            x = sx
-            Line(points=(x, y, self.width - x, y))
-            sx += (center_x - center_width/2)/self.LINES
-        
-        #display left border :
-        sy = 0
-        count = 0 
-        while count <= self.LINES :
-            count += 1
-            x = sy*(center_x - center_width/2)/(center_y - center_height/2)
-            y = sy
-            Line(points=(x, y, x, self.height - y))
-            sy += (center_y - center_height/2)/self.LINES
-        
-        #display right border :
-        sx = self.width
-        count = 0 
-        while count <= self.LINES :
-            count += 1
-            y = sx*(center_y - center_height/2)/(center_x + center_width/2 - self.width) + self.height
-            x = sx
-            Line(points=(x, y, x, self.height - y))
-            sx -= (self.width - (center_x + center_width/2))/self.LINES
-
-        #display top border :
-        sy = self.height
-        count = 0
-        while count <= self.LINES :
-            count += 1
-            x = sy*(center_x - center_width/2)/(center_y - center_height/2)
-            y = sy
-            Line(points=(x, y, self.width - x, y))
-            sy -= (self.height - (center_y + center_height/2))/self.LINES
-
+        x = self.width/2
+        y = self.height/2
+        w = self.width/3
+        h = self.height/3
+        for c in range(self.LINES):
+            start1 = [x - w/2- c    *(x - w/2)/self.LINES, (y  - h/2) - c    *(y  - h/2)/self.LINES]
+            end1   = [x + w/2+ c    *(x - w/2)/self.LINES, (y  - h/2) - c    *(y  - h/2)/self.LINES]
+            start2 = [x - w/2- (c+1)*(x - w/2)/self.LINES, (y  - h/2) - (c+1)*(y  - h/2)/self.LINES]
+            end2   = [x + w/2+ (c+1)*(x - w/2)/self.LINES, (y  - h/2) - (c+1)*(y  - h/2)/self.LINES]
+            Line(points=(start1, start2))
+            Color(0, 1, 0, 1)
+            Line(points=(end1, end2))
+            for l in range(self.COLS):
+                print(c, l)
+                p1 = [start1[0] + l    *(end1[0] - start1[0])/self.COLS, start1[1]]
+                p2 = [start2[0] + l    *(end2[0] - start2[0])/self.COLS, start2[1]]
+                p3 = [start1[0] + (l+1)*(end1[0] - start1[0])/self.COLS, start1[1]]
+                p4 = [start2[0] + (l+1)*(end2[0] - start2[0])/self.COLS, start2[1]]
+                
+                if(self.matrix[c][l] == 0):
+                    Line(points=(p1, p3, p4 ,p2, p1))  
 
 
 
