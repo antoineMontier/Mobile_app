@@ -45,18 +45,15 @@ class MyScreen(Widget):
 class GameCanvas(Widget):
 
     COLS = 10
-    LINES = 20
-    MEMORY_ROWS = 20
+    LINES = 10
     INCLINATION = 0.2
 
     def __init__(self, **kwargs):
         # self declarations of variables
-        self.fps = 60.0
-        self.matrix = [[0 for x in range(self.COLS)]
-                        for y in range(self.LINES + self.MEMORY_ROWS)]
-        self.matrix[5][0] = 1
-        self.matrix[6][1] = 1
-        self.matrix[7][2] = 1
+        self.it = 0
+        self.fps = 10.0
+        self.matrix = [[0 for x in range(self.COLS*4)]
+                        for y in range(self.LINES)]
 
         super(GameCanvas, self).__init__(**kwargs)
         self.print_matrix()
@@ -73,14 +70,12 @@ class GameCanvas(Widget):
         time_factor = self.fps*dt
         with self.canvas:
             Color(0, 0, 0, 1)
-            Rectangle(pos=(0, 0), size=(self.width, self.height))
             Color(1, 0, 0, 1)
             #polygon(100, 100, 200, 120, 210, 200, 120, 190, False)
             #Line(points=(0, 0, 0, 400, 200, 200))
             #self.draw_grid()
             #Ellipse(pos=(0, 0), size=(self.width, 100), angle_start=0, angle_end=180)
-        self.draw_cylinder()
-
+            self.draw_rect()
 
     def draw_grid(self):
         with self.canvas:
@@ -98,37 +93,61 @@ class GameCanvas(Widget):
                 print(self.matrix[i][j], end=" ")
             print("|" + str(i))
 
-    def draw_cylinder(self):
-        with self.canvas:
-            precision_draw = 0.001
-            # lets find the radius of the bigger circle (englobing the full screen):
-            tile_size = 0.0
-            radius = distance(self.width/2, self.height/2, 0, 0)
-            end_opening = radius*0.01
-            Color(1, 1, 0, 1)
-            for i in range(self.COLS):#colss display
-                alpha = i/(float(self.COLS))*3.1415*2
-                Line(points=(self.width/2 + cos(alpha)*(end_opening+2),self.height/2 + sin(alpha)*(end_opening+2), self.width/2 + cos(alpha)*radius,self.height/2 + sin(alpha)*radius))
-            for i in range(self.LINES + self.MEMORY_ROWS):#line display
-                long = end_opening + i*i*(radius - end_opening)/(self.LINES*self.LINES)
-                Line(circle=(self.width/2, self.height/2, long*2))
-            #now let's color the inside of the cells:
-            Color(1, 0, 0, 1)
-            for i in range(self.LINES + self.MEMORY_ROWS):
-                for j in range(self.COLS):
-                    if(self.matrix[i][j] != 0):
-                        alpha1 = (j-1)/(float(self.COLS))*3.1415*2
-                        alpha2 = j/(float(self.COLS))*3.1415*2
-                        
-                        angle = min(alpha1, alpha2)
-                        
-                        while(angle < max(alpha1, alpha2)):
-                            leng1 = end_opening + i*i*((radius - end_opening)/(self.LINES*self.LINES) *(1 + self.INCLINATION))
-                            leng2 = end_opening + (i+1)*(i+1)*((radius - end_opening)/(self.LINES*self.LINES)*(1 + self.INCLINATION))
-                            print(angle)
-                            Line(points=(self.width/2 + leng1*cos(angle), self.height/2 + leng1*sin(angle), self.width/2 + leng2*cos(angle), self.height/2 + leng2*sin(angle)))
-                            angle+=precision_draw*3.1415*2
-                    
+    def draw_rect(self):
+        center_x = self.width/2
+        center_y = self.height/2
+        center_width = self.width/3
+        center_height = self.height/3
+        #display down border :
+        sx = 0
+        count = 0 
+        while count <= self.LINES :
+            count += 1
+            y = sx*(center_y - center_height/2)/(center_x - center_width/2)
+            x = sx
+            Line(points=(x, y, self.width - x, y))
+            sx += (center_x - center_width/2)/self.LINES
+        
+        #display left border :
+        sy = 0
+        count = 0 
+        while count <= self.LINES :
+            count += 1
+            x = sy*(center_x - center_width/2)/(center_y - center_height/2)
+            y = sy
+            Line(points=(x, y, x, self.height - y))
+            sy += (center_y - center_height/2)/self.LINES
+        
+        #display right border :
+        sx = self.width
+        count = 0 
+        while count <= self.LINES :
+            count += 1
+            y = sx*(center_y - center_height/2)/(center_x + center_width/2 - self.width) + self.height
+            x = sx
+            Line(points=(x, y, x, self.height - y))
+            sx -= (self.width - (center_x + center_width/2))/self.LINES
+
+        #display top border :
+        sy = self.height
+        count = 0
+        while count <= self.LINES :
+            count += 1
+            x = sy*(center_x - center_width/2)/(center_y - center_height/2)
+            y = sy
+            Line(points=(x, y, self.width - x, y))
+            sy -= (self.height - (center_y + center_height/2))/self.LINES
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -141,8 +160,6 @@ class MyApp(App):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-
     def build(self):
         #Window.clearcolor = 9/255, 11/255, 10/255, 1#bg color
         #Window.size = (1080*0.3, 2400*0.3)
