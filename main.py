@@ -19,7 +19,7 @@ import random
 import kivy
 kivy.require('1.9.0')
 
-Config.set('graphics', 'width', '600')
+Config.set('graphics', 'width', '600')                              #idea : store the path as a matrix to make calcculations easier... and don't wait for any path on the top
 Config.set('graphics', 'height', '900')
 
 
@@ -44,19 +44,22 @@ class MyScreen(Widget):
 
 class GameCanvas(Widget):
 
-    COLS = 8
-    LINES = 5
+    COLS = 7
+    LINES = 15
     INCLINATION = 0.2
 
     def __init__(self, **kwargs):
         # self declarations of variables
+        self.last_played = 0
         self.it = 0
-        self.fps = 60.0
-        self.speed = 0.05
+        self.fps = 20.0
+        self.speed = 0.2
+        self.center = [self.width*0.5, self.height*0.2]
+        self.center_size = [self.width*0.1, self.height*0.1]
         self.matrix = [[1 for x in range(self.COLS*4)]
                         for y in range(self.LINES)]
         self.new_row = [0 for x in range(self.COLS*4)]
-        self.last_path = self.COLS*1 + 2
+        self.last_path = self.COLS//2
         self.matrix[0][3] = 1
         for i in range(len(self.matrix[0])):
             self.matrix[0][i] = 1
@@ -85,13 +88,15 @@ class GameCanvas(Widget):
             #Ellipse(pos=(0, 0), size=(self.width, 100), angle_start=0, angle_end=180)
             Color(0, 1, 0, 1)
 
-            self.draw_rect(self.it)
+            self.draw_rect(self.it, self.center[0], self.center[1], self.center_size[0], self.center_size[1])
+            Color(0, 0, 0, 1)
+            Rectangle(pos=(self.center[0] - self.center_size[0]*5, self.center[1] - self.center_size[1]*5), size=(self.center_size[0]*10 , self.center_size[1]*10))
 
-            Color(0, 0, 1, 1)
-            Line(points=(self.width/3, self.height, self.width/3, 0))
-            Line(points=(2*self.width/3, self.height, 2*self.width/3, 0))
-            Line(points=(self.width, self.height/3, 0, self.height/3))
-            Line(points=(self.width, 2*self.height/3, 0, 2*self.height/3))
+            #Color(0, 0, 1, 1)
+            #Line(points=(self.width/3, self.height, self.width/3, 0))
+            #Line(points=(2*self.width/3, self.height, 2*self.width/3, 0))
+            #Line(points=(self.width, self.height/3, 0, self.height/3))
+            #Line(points=(self.width, 2*self.height/3, 0, 2*self.height/3))
             print("fps = "+str(1/(dt)))
         if(self.it >= 1):
             self.it = 0
@@ -103,7 +108,7 @@ class GameCanvas(Widget):
             self.matrix[0] = self.new_row
             self.new_row = [0 for i in range(len(self.new_row))]
             a = random.random()
-            if(a < 0.3):#new path to the left
+            if(a < 0.2 and self.last_played == 0):#new path to the left
                 if(self.last_path == 0):
                     self.new_row[len(self.new_row)-1] = 1
                     self.new_row[self.last_path] = 1
@@ -112,7 +117,8 @@ class GameCanvas(Widget):
                     self.new_row[self.last_path] = 1
                     self.new_row[self.last_path-1] = 1
                     self.last_path -= 1
-            elif(a < 0.6):#new path to the right
+                self.last_played = -1
+            elif(a < 0.4 and self.last_played == 0):#new path to the right
                 if(self.last_path == len(self.new_row)-1):
                     self.new_row[0] = 1
                     self.new_row[self.last_path] = 1
@@ -121,13 +127,10 @@ class GameCanvas(Widget):
                     self.new_row[self.last_path] = 1
                     self.new_row[self.last_path+1] = 1
                     self.last_path += 1
+                self.last_played = 1
             else:#new path forward
                 self.new_row[self.last_path] = 1
-            self.print_matrix()
-
-
-
-
+                self.last_played = 0
         self.it += self.speed*time_factor
 
 
@@ -147,12 +150,7 @@ class GameCanvas(Widget):
                 print(self.matrix[i][j], end=" ")
             print("|" + str(i))
 
-    def draw_rect(self, a):
-        x = self.width*0.5
-        y = self.height*0.6
-        w = self.width*0.2
-        h = self.height*0.1
-        #bottom
+    def draw_rect(self, a, x, y, w, h):
         for c in range(self.COLS):
             #first the "vertical" lines
             Line(points=(x - w/2 + c*w/self.COLS, y - h/2, 0 + c*self.width/self.COLS, 0))
@@ -167,6 +165,7 @@ class GameCanvas(Widget):
             for l in range(self.COLS*2):
                 if(self.matrix[c][l] != 0):
                     o = c+a
+                    #bottom
                     if(l < self.COLS):
                         p1 = [(x - w/2)*(1- o/self.LINES) + l*o*(self.width - w)/(self.LINES*self.COLS) + l*w/self.COLS,
                         (y  - h/2)*(1 - (c + a)/self.LINES)]
