@@ -51,12 +51,12 @@ class GameCanvas(Widget):
     def __init__(self, **kwargs):
         # self declarations of variables
         self.it = 0
-        self.fps = 10.0
+        self.fps = 30.0
         self.speed = 0.05
         self.matrix = [[1 for x in range(self.COLS*4)]
                         for y in range(self.LINES)]
         self.new_row = [0 for x in range(self.COLS*4)]
-        self.last_path = self.COLS//2
+        self.last_path = self.COLS + 2
         self.matrix[0][3] = 1
         for i in range(len(self.matrix[0])):
             self.matrix[0][i] = 1
@@ -103,7 +103,7 @@ class GameCanvas(Widget):
             self.matrix[0] = self.new_row
             self.new_row = [0 for i in range(len(self.new_row))]
             a = random.random()
-            if(a < 0.3333):#new path to the left
+            if(a < 0.3):#new path to the left
                 if(self.last_path == 0):
                     self.new_row[len(self.new_row)-1] = 1
                     self.new_row[self.last_path] = 1
@@ -112,7 +112,7 @@ class GameCanvas(Widget):
                     self.new_row[self.last_path] = 1
                     self.new_row[self.last_path-1] = 1
                     self.last_path -= 1
-            elif(a < 0.6667):#new path to the right
+            elif(a < 0.6):#new path to the right
                 if(self.last_path == len(self.new_row)-1):
                     self.new_row[0] = 1
                     self.new_row[self.last_path] = 1
@@ -149,7 +149,7 @@ class GameCanvas(Widget):
 
     def draw_rect(self, animation):
         x = self.width*0.5
-        y = self.height*0.3
+        y = self.height*0.6
         w = self.width*0.2
         h = self.height*0.1
         #bottom
@@ -158,39 +158,28 @@ class GameCanvas(Widget):
             Line(points=(x - w/2 + c*w/self.COLS, y - h/2, 0 + c*self.width/self.COLS, 0))
         #then the polygons
         for c in range(self.LINES):
-            start1 = [x - w/2- (c+animation)  *(x - w/2)/self.LINES, (y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES]
-            end1   = [x + w/2+ (c+animation)  *(self.width - x - w/2)/self.LINES, (self.height- y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES]
-            start2 = [x - w/2- (c+animation+1)*(x - w/2)/self.LINES, (y  - h/2) - (c+1+animation)*(y  - h/2)/self.LINES]
-            end2   = [x + w/2+ (c+animation+1)*(self.width - x - w/2)/self.LINES, (self.height- y  - h/2) - (c+1+animation)*(y  - h/2)/self.LINES]
             for l in range(self.COLS):
-                p1 = [start1[0] + l    *(end1[0] - start1[0])/self.COLS, start1[1]]
-                p2 = [start2[0] + l    *(end2[0] - start2[0])/self.COLS, start2[1]]
-                p3 = [start1[0] + (l+1)*(end1[0] - start1[0])/self.COLS, start1[1]]
-                p4 = [start2[0] + (l+1)*(end2[0] - start2[0])/self.COLS, start2[1]]
-                if(self.matrix[c][l] == 0):
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
-                else:
+                if(self.matrix[c][l] != 0):
+                    p1 = [x - w/2- (c+animation)  *(x - w/2)/self.LINES + l    *(x + w/2+ (c+animation)  *(self.width - x - w/2)/self.LINES - (x - w/2- (c+animation)  *(x - w/2)/self.LINES))/self.COLS, (y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES]
+                    p2 = [x - w/2- (c+animation+1)*(x - w/2)/self.LINES + l    *(x + w/2+ (c+animation+1)*(self.width - x - w/2)/self.LINES - (x - w/2- (c+animation+1)*(x - w/2)/self.LINES))/self.COLS, (y  - h/2) - (c+1+animation)*(y  - h/2)/self.LINES]
+                    p3 = [x - w/2- (c+animation)  *(x - w/2)/self.LINES + (l+1)*(x + w/2+ (c+animation)  *(self.width - x - w/2)/self.LINES - (x - w/2- (c+animation)  *(x - w/2)/self.LINES))/self.COLS, (y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES]
+                    p4 = [x - w/2- (c+animation+1)*(x - w/2)/self.LINES + (l+1)*(x + w/2+ (c+animation+1)*(self.width - x - w/2)/self.LINES - (x - w/2- (c+animation+1)*(x - w/2)/self.LINES))/self.COLS, (y  - h/2) - (c+1+animation)*(y  - h/2)/self.LINES]
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
         #up
         #first the "vertical" lines
-        for c in range(self.COLS):
-            Line(points=(x - w/2 + c*w/self.COLS,  y + h/2, + c*self.width/self.COLS, self.height ))
+        for c in range(self.COLS + 1):
+            Line(points=(x - w/2 + c*w/self.COLS,  y + h/2, + c*self.width/self.COLS, self.height))
         #then the polygons
         for c in range(self.LINES):
-            start1 = [x - w/2 - (c+animation)    *(x - w/2)/self.LINES, (y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES]
-            end1   = [x + w/2 + (c+animation)    *(self.width - x - w/2)/self.LINES, (y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES]
-            start2 = [x - w/2 - (c+animation+1)*(x - w/2)/self.LINES, (y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES]
-            end2   = [x + w/2 + (c+animation+1)*(self.width - x - w/2)/self.LINES, (y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES]
             for l in range(self.COLS*2, self.COLS*3):
-                p1 = [start1[0] + (l - self.COLS*2)    *(end1[0] - start1[0])/self.COLS, start1[1]]
-                p2 = [start2[0] + (l - self.COLS*2)    *(end2[0] - start2[0])/self.COLS, start2[1]]
-                p3 = [start1[0] + (l - self.COLS*2+1)*(end1[0] - start1[0])/self.COLS, start1[1]]
-                p4 = [start2[0] + (l - self.COLS*2+1)*(end2[0] - start2[0])/self.COLS, start2[1]]
-                if(self.matrix[c][self.COLS*5-l - 1] == 0):
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
-                else:
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False) 
+                if(self.matrix[c][self.COLS*5-l - 1] != 0):
+                    p1 = [(x - w/2 - (c+animation)    *(x - w/2)/self.LINES) + (l - self.COLS*2)    *(x + w/2 + (c+animation)    *(self.width - x - w/2)/self.LINES - (x - w/2 - (c+animation)    *(x - w/2)/self.LINES))/self.COLS, (y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES]
+                    p2 = [(x - w/2 - (c+animation+1)*(x - w/2)/self.LINES) + (l - self.COLS*2)    *(x + w/2 + (c+animation+1)*(self.width - x - w/2)/self.LINES - (x - w/2 - (c+animation+1)*(x - w/2)/self.LINES))/self.COLS, (y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES]
+                    p3 = [(x - w/2 - (c+animation)    *(x - w/2)/self.LINES) + (l - self.COLS*2+1)*(x + w/2 + (c+animation)    *(self.width - x - w/2)/self.LINES - (x - w/2 - (c+animation)    *(x - w/2)/self.LINES))/self.COLS, (y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES]
+                    p4 = [(x - w/2 - (c+animation+1)*(x - w/2)/self.LINES) + (l - self.COLS*2+1)*(x + w/2 + (c+animation+1)*(self.width - x - w/2)/self.LINES - (x - w/2 - (c+animation+1)*(x - w/2)/self.LINES))/self.COLS, (y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES]
+                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
+                
 
         #left
         #first the "vertical" lines
@@ -198,18 +187,12 @@ class GameCanvas(Widget):
             Line(points=(0, c*self.height/self.COLS, x - w/2, y - h/2 + c*h/self.COLS ))
         #then the polygons
         for c in range(self.LINES):
-            start1 = [x - w/2- (c+animation)    *(x - w/2)/self.LINES, (y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES]
-            end1   = [x - w/2- (c+animation)    *(self.width - x - w/2)/self.LINES, (y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES]
-            start2 = [x - w/2- (c+animation+1)*(x - w/2)/self.LINES, (y  - h/2) - (c+animation+1)*(y  - h/2)/self.LINES]
-            end2   = [x - w/2- (c+animation+1)*(self.width - x - w/2)/self.LINES, (y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES]
             for l in range(self.COLS*3, self.COLS*4):
-                p1 = [start1[0], start1[1] + (l - self.COLS*3)  *(end1[1]-start1[1])/self.COLS]
-                p2 = [start2[0], start2[1] + (l - self.COLS*3)  *(end2[1]-start2[1])/self.COLS]
-                p3 = [start1[0], start1[1] + (l - self.COLS*3+1)*(end1[1]-start1[1])/self.COLS]
-                p4 = [start2[0], start2[1] + (l - self.COLS*3+1)*(end2[1]-start2[1])/self.COLS]
-                if(self.matrix[c][self.COLS*7 - l - 1] == 0):
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
-                else:
+                if(self.matrix[c][self.COLS*7 - l - 1] != 0):
+                    p1 = [x - w/2- (c+animation)    *(x - w/2)/self.LINES, ((y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES) + (l - self.COLS*3)  *((y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES))/self.COLS]
+                    p2 = [x - w/2- (c+animation+1)*(x - w/2)/self.LINES, ((y  - h/2) - (c+animation+1)*(y  - h/2)/self.LINES) + (l - self.COLS*3)  *((y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation+1)*(y  - h/2)/self.LINES))/self.COLS]
+                    p3 = [x - w/2- (c+animation)    *(x - w/2)/self.LINES, ((y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES) + (l - self.COLS*3+1)*((y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation)    *(y  - h/2)/self.LINES))/self.COLS]
+                    p4 = [x - w/2- (c+animation+1)*(x - w/2)/self.LINES, ((y  - h/2) - (c+animation+1)*(y  - h/2)/self.LINES) + (l - self.COLS*3+1)*((y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation+1)*(y  - h/2)/self.LINES))/self.COLS]
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
         #right
@@ -218,18 +201,12 @@ class GameCanvas(Widget):
             Line(points=(self.width, c*self.height/self.COLS, x + w/2, y - h/2 + c*h/self.COLS ))
         #then the polygons
         for c in range(self.LINES):
-            start1 = [x + w/2+ (c+animation)    *(self.width - x - w/2)/self.LINES, (y  - h/2) - (c+animation)    *( y  - h/2)/self.LINES]
-            end1   = [x + w/2+ (c+animation)    *(self.width-x - w/2)/self.LINES, (y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES]
-            start2 = [x + w/2+ (c+animation+1)*(self.width - x - w/2)/self.LINES, (y  - h/2) - (c+animation+1)*( y  - h/2)/self.LINES]
-            end2   = [x + w/2+ (c+animation+1)*(self.width-x - w/2)/self.LINES, (y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES]
             for l in range(self.COLS*1, self.COLS*2):
-                p1 = [start1[0], start1[1] + (l - self.COLS*1)  *(end1[1]-start1[1])/self.COLS]
-                p2 = [start2[0], start2[1] + (l - self.COLS*1)  *(end2[1]-start2[1])/self.COLS]
-                p3 = [start1[0], start1[1] + (l - self.COLS*1+1)*(end1[1]-start1[1])/self.COLS]
-                p4 = [start2[0], start2[1] + (l - self.COLS*1+1)*(end2[1]-start2[1])/self.COLS]
-                if(self.matrix[c][l] == 0):
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], True)
-                else:
+                if(self.matrix[c][l] != 0):
+                    p1 = [x + w/2+ (c+animation)    *(self.width - x - w/2)/self.LINES, ((y  - h/2) - (c+animation)    *( y  - h/2)/self.LINES) + (l - self.COLS*1)  *((y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation)    *( y  - h/2)/self.LINES))/self.COLS]
+                    p2 = [x + w/2+ (c+animation+1)*(self.width - x - w/2)/self.LINES, ((y  - h/2) - (c+animation+1)*( y  - h/2)/self.LINES) + (l - self.COLS*1)  *((y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation+1)*( y  - h/2)/self.LINES))/self.COLS]
+                    p3 = [x + w/2+ (c+animation)    *(self.width - x - w/2)/self.LINES, ((y  - h/2) - (c+animation)    *( y  - h/2)/self.LINES) + (l - self.COLS*1+1)*((y  + h/2) + (c+animation)    *(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation)    *( y  - h/2)/self.LINES))/self.COLS]
+                    p4 = [x + w/2+ (c+animation+1)*(self.width - x - w/2)/self.LINES, ((y  - h/2) - (c+animation+1)*( y  - h/2)/self.LINES) + (l - self.COLS*1+1)*((y  + h/2) + (c+animation+1)*(self.height - y  - h/2)/self.LINES-((y  - h/2) - (c+animation+1)*( y  - h/2)/self.LINES))/self.COLS]    
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
 
