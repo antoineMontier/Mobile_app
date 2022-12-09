@@ -163,24 +163,36 @@ class GameCanvas(Widget):
             #first the "vertical" lines
             Line(points=(self.width, c*self.height/self.COLS, x + w/2, y - h/2 + c*h/self.COLS))
         #then the polygons
-        for c in range(self.LINES):#
-            for l in range(self.COLS):
-                if(self.matrix[c][l] != 0):
-                    p1 = [(x - w/2)*(1- (c+a)/self.LINES) + l*(c+a)*(self.width - w)/(self.LINES*self.COLS) + l*w/self.COLS,
-                    (y  - h/2)*(1 - (c + a)/self.LINES)]
-                    p2 = [(x - w/2)*(1- (c+a+1)/self.LINES) + l*(c+a+1)*(self.width - w)/(self.LINES*self.COLS) + l*w/self.COLS,
-                    (y  - h/2)*(1 - (c + a + 1)/self.LINES)]
-                    p3 = [(x - w/2)*(1- (c+a)/self.LINES) + (l+1)*(c+a)*(self.width - w)/(self.LINES*self.COLS) + (l+1)*w/self.COLS,
-                    (y  - h/2)*(1 - (c + a)/self.LINES)]
-                    p4 = [(x - w/2)*(1- (c+a+1)/self.LINES) + (l+1)*(c+a+1)*(self.width - w)/(self.LINES*self.COLS) + (l+1)*w/self.COLS,
-                    (y  - h/2)*(1 - (c + a + 1)/self.LINES)]
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
-
-        #up
-        #then the polygons
         for c in range(self.LINES):
+            for l in range(self.COLS*2):
+                if(self.matrix[c][l] != 0):
+                    o = c+a
+                    if(l < self.COLS):
+                        p1 = [(x - w/2)*(1- o/self.LINES) + l*o*(self.width - w)/(self.LINES*self.COLS) + l*w/self.COLS,
+                        (y  - h/2)*(1 - (c + a)/self.LINES)]
+                        p2 = [(x - w/2)*(1- (o+1)/self.LINES) + l*(o+1)*(self.width - w)/(self.LINES*self.COLS) + l*w/self.COLS,
+                        (y  - h/2)*(1 - (c + a + 1)/self.LINES)]
+                        p3 = [(x - w/2)*(1- o/self.LINES) + (l+1)*o*(self.width - w)/(self.LINES*self.COLS) + (l+1)*w/self.COLS,
+                        (y  - h/2)*(1 - (c + a)/self.LINES)]
+                        p4 = [(x - w/2)*(1- (o+1)/self.LINES) + (l+1)*(o+1)*(self.width - w)/(self.LINES*self.COLS) + (l+1)*w/self.COLS,
+                        (y  - h/2)*(1 - (c + a + 1)/self.LINES)]
+                        polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
+                    else:
+                    #right
+                    #then the polygons
+                        p1 = [x + w/2+ o*(self.width - x - w/2)/self.LINES,
+                        ((y  - h/2)*(1- o/self.LINES))   + (l/self.COLS - 1)    *(h + o/self.LINES   *(self.height - h))]
+                        p2 = [x + w/2+ (o+1)*(self.width - x - w/2)/self.LINES,
+                        ((y  - h/2)*(1- (o+1)/self.LINES)) + (l/self.COLS-1)      *(h + (o+1)/self.LINES *(self.height - h))]
+                        p3 = [x + w/2+ o*(self.width - x - w/2)/self.LINES,
+                        ((y  - h/2)*(1- o/self.LINES))   + ((l+1)/self.COLS -1) *(h + o/self.LINES   *(self.height - h))]
+                        p4 = [x + w/2+ (o+1)*(self.width - x - w/2)/self.LINES,
+                        ((y  - h/2)*(1- (o+1)/self.LINES)) + ((l+1)/self.COLS -1) *(h + (o+1)/self.LINES *(self.height - h))]
+                        polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
+            #up
+            #then the polygons
             for l in range(self.COLS*2, self.COLS*3):
-                if(self.matrix[c][self.COLS*5-l - 1] != 0):
+                if(self.matrix[c][self.COLS*5 - l - 1] != 0):
                     p1 = [((x - w/2)*(1- (c+a)/self.LINES))   + (l/self.COLS - 2)    *(w + (c+a)  *(self.width - w)/self.LINES),
                     (y  + h/2) + (c+a)    *(self.height - y  - h/2)/self.LINES]
                     p2 = [((x - w/2)*(1- (c+1+a)/self.LINES)) + (l/self.COLS - 2)    *(w + (c+a+1)*(self.width - w)/self.LINES),
@@ -190,11 +202,8 @@ class GameCanvas(Widget):
                     p4 = [((x - w/2)*(1- (c+1+a)/self.LINES)) + ((l+1)/self.COLS - 2)*(w + (c+a+1)*(self.width - w)/self.LINES),
                     (y  + h/2) + (c+a+1)*(self.height - y  - h/2)/self.LINES]
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
-                
-
-        #left
-        #then the polygons
-        for c in range(self.LINES):
+            #left
+            #then the polygons
             for l in range(self.COLS*3, self.COLS*4):
                 if(self.matrix[c][self.COLS*7 - l - 1] != 0):
                     p1 = [(x - w/2)*(1-(c+a)/self.LINES),
@@ -205,21 +214,6 @@ class GameCanvas(Widget):
                     (y  - h/2)*(1 - (c+a)/self.LINES)   + ((l+1)/self.COLS - 3) *((h + (self.height - h)*(c+a)/self.LINES))]
                     p4 = [(x - w/2)*(1-(c+a+1)/self.LINES),
                     (y  - h/2)*(1 - (c+a+1)/self.LINES) + ((l+1)/self.COLS - 3) *(h + (self.height - h)*(c+a+1)/self.LINES)]
-                    polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
-
-        #right
-        #then the polygons
-        for c in range(self.LINES):
-            for l in range(self.COLS*1, self.COLS*2):
-                if(self.matrix[c][l] != 0):
-                    p1 = [x + w/2+ (c+a)*(self.width - x - w/2)/self.LINES,
-                    ((y  - h/2)*(1- (c+a)/self.LINES))   + (l/self.COLS - 1)    *(h + (c+a)/self.LINES   *(self.height - h))]
-                    p2 = [x + w/2+ (c+a+1)*(self.width - x - w/2)/self.LINES,
-                    ((y  - h/2)*(1- (c+a+1)/self.LINES)) + (l/self.COLS-1)      *(h + (c+a+1)/self.LINES *(self.height - h))]
-                    p3 = [x + w/2+ (c+a)*(self.width - x - w/2)/self.LINES,
-                    ((y  - h/2)*(1- (c+a)/self.LINES))   + ((l+1)/self.COLS -1) *(h + (c+a)/self.LINES   *(self.height - h))]
-                    p4 = [x + w/2+ (c+a+1)*(self.width - x - w/2)/self.LINES,
-                    ((y  - h/2)*(1- (c+a+1)/self.LINES)) + ((l+1)/self.COLS -1) *(h + (c+a+1)/self.LINES *(self.height - h))]
                     polygon(p1[0], p1[1], p3[0], p3[1], p4[0], p4[1] , p2[0], p2[1], False)
 
 
