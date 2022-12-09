@@ -1,4 +1,4 @@
-import math
+import math, random
 from kivy.graphics.vertex import *
 from kivy.properties import ObjectProperty, Clock
 from kivy.graphics.vertex_instructions import *
@@ -45,16 +45,22 @@ class MyScreen(Widget):
 class GameCanvas(Widget):
 
     COLS = 8
-    LINES = 20
+    LINES = 5
     INCLINATION = 0.2
 
     def __init__(self, **kwargs):
         # self declarations of variables
         self.it = 0
-        self.fps = 30.0
-        self.speed = 0.1
-        self.matrix = [[0 for x in range(self.COLS*4)]
+        self.fps = 10.0
+        self.speed = 0.05
+        self.matrix = [[1 for x in range(self.COLS*4)]
                         for y in range(self.LINES)]
+        self.new_row = [0 for x in range(self.COLS*4)]
+        self.last_path = self.COLS//2
+        self.matrix[0][3] = 1
+        for i in range(len(self.matrix[0])):
+            self.matrix[0][i] = 1
+        self.new_row[self.last_path] = 1
 
         super(GameCanvas, self).__init__(**kwargs)
         self.print_matrix()
@@ -87,7 +93,42 @@ class GameCanvas(Widget):
             Line(points=(self.width, self.height/3, 0, self.height/3))
             Line(points=(self.width, 2*self.height/3, 0, 2*self.height/3))
             print("fps = "+str(1/(dt)))
-        self.it = self.it % 1 + self.speed*time_factor
+        if(self.it >= 1):
+            self.it = 0
+            i = len(self.matrix) - 1
+            while i > 0:
+                self.matrix[i] = self.matrix[i-1]
+                i -= 1
+            # i = 0
+            self.matrix[0] = self.new_row
+            self.new_row = [0 for i in range(len(self.new_row))]
+            a = random.random()
+            if(a < 0.3333):#new path to the left
+                if(self.last_path == 0):
+                    self.new_row[len(self.new_row)-1] = 1
+                    self.new_row[self.last_path] = 1
+                    self.last_path = len(self.new_row)-1
+                else:
+                    self.new_row[self.last_path] = 1
+                    self.new_row[self.last_path-1] = 1
+                    self.last_path -= 1
+            elif(a < 0.6667):#new path to the right
+                if(self.last_path == len(self.new_row)-1):
+                    self.new_row[0] = 1
+                    self.new_row[self.last_path] = 1
+                    self.last_path = 0
+                else:
+                    self.new_row[self.last_path] = 1
+                    self.new_row[self.last_path+1] = 1
+                    self.last_path += 1
+            else:#new path forward
+                self.new_row[self.last_path] = 1
+            self.print_matrix()
+
+
+
+
+        self.it += self.speed*time_factor
 
 
     def draw_grid(self):
